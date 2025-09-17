@@ -256,14 +256,14 @@ namespace CsbBuilder
                 return;
             }
 
-            using (OpenFileDialog openCsbFile = new OpenFileDialog
+            VistaOpenFileDialog openCsbFile = new VistaOpenFileDialog
             {
                 Title = "Import CSB file",
                 DefaultExt = "csb",
                 Filter = "CSB Files|*.csb",
-            })
+            };
             {
-                if (openCsbFile.ShowDialog() == DialogResult.OK)
+                if (openCsbFile.ShowDialog() == true)
                 {
                     using (CreateNewProjectForm createProject = new CreateNewProjectForm(openCsbFile.FileName))
                     {
@@ -971,14 +971,14 @@ namespace CsbBuilder
 
         private void MergeProject(object sender, EventArgs e)
         {
-            using (OpenFileDialog openProject = new OpenFileDialog
+            VistaOpenFileDialog openProject = new VistaOpenFileDialog
             {
                 Title = "Merge project with",
                 Filter = "CSB Project files|*.csbproject",
                 DefaultExt = "csbproject",
-            })
+            };
             {
-                if (openProject.ShowDialog() == DialogResult.OK)
+                if (openProject.ShowDialog() == true)
                 {
                     CsbProject csbProject = CsbProject.Load(openProject.FileName);
 
@@ -1012,14 +1012,14 @@ namespace CsbBuilder
 
         private void ImportAndMergeProject(object sender, EventArgs e)
         {
-            using (OpenFileDialog openCsbFile = new OpenFileDialog
+            VistaOpenFileDialog openCsbFile = new VistaOpenFileDialog
             {
                 Title = "Import and merge CSB file with",
                 DefaultExt = "csb",
                 Filter = "CSB Files|*.csb",
-            })
+            };
             {
-                if (openCsbFile.ShowDialog() == DialogResult.OK)
+                if (openCsbFile.ShowDialog() == true)
                 {
                     CsbProject csbProject = new CsbProject();
                     csbProject.Directory = project.Directory;
