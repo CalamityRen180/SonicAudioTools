@@ -15,6 +15,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 
+using Ookii.Dialogs.Wpf;
+
 using CsbBuilder.Builder;
 using CsbBuilder.BuilderNodes;
 using CsbBuilder.Audio;
