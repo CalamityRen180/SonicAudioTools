@@ -31,6 +31,10 @@ namespace CsbBuilder.Project
         [Description("Determines whether a node is going to be named after its parent when created.")]
         public bool NameNodeAfterParent { get; set; }
 
+        [DisplayName("EnableCPKCreation"), Category("Stream")]
+        [Description("Wheater we either create CPK files with the streamed audio files OR we write the streamed audio files externally.")]
+        public bool EnableCPKCreation { get; set; }
+
         [DisplayName("Buffer size"), Category("Stream")]
         [Description("Buffer size to use for I/O operations.")]
         public int BufferSize { get; set; }
@@ -124,6 +128,7 @@ namespace CsbBuilder.Project
             ImportedCsbProjectDirectory = ProjectDirectory.DirectoryOfCsb;
             RenameToSoundElement = true;
             EnableThreading = true;
+            EnableCPKCreation = true;
             MaxThreads = 4;
             LoopCount = 2;
             FadeTime = 10;

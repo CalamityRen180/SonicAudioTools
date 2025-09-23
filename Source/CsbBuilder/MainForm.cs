@@ -914,14 +914,14 @@ namespace CsbBuilder
 
         private void SaveProjectAs(object sender, EventArgs e)
         {
-            using (SaveFileDialog saveProject = new SaveFileDialog
+            VistaSaveFileDialog saveProject = new VistaSaveFileDialog
             {
                 Title = "Save CSB project file as",
                 Filter = "CSB Project files|*.csbproject",
                 DefaultExt = "csbproject",
-            })
+            };
             {
-                if (saveProject.ShowDialog() == DialogResult.OK)
+                if (saveProject.ShowDialog() == true)
                 {
                     project.Order(cueTree, synthTree, soundElementTree, aisacTree, voiceLimitGroupTree);
                     project.SaveAs(saveProject.FileName);
@@ -948,15 +948,15 @@ namespace CsbBuilder
 
         private void BuildProjectAs(object sender, EventArgs e)
         {
-            using (SaveFileDialog buildCsb = new SaveFileDialog()
+            VistaSaveFileDialog buildCsb = new VistaSaveFileDialog()
             {
                 Title = "Build current project as",
                 DefaultExt = "csb",
                 Filter = "CSB Files|*.csb",
                 FileName = project.Name,
-            })
+            };
             {
-                if (buildCsb.ShowDialog() == DialogResult.OK)
+                if (buildCsb.ShowDialog() == true)
                 {
                     project.Order(cueTree, synthTree, soundElementTree, aisacTree, voiceLimitGroupTree);
                     Builder.CsbBuilder.Build(project, buildCsb.FileName);

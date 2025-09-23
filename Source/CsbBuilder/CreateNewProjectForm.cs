@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 
+using Ookii.Dialogs.Wpf;
+
 using CsbBuilder.Project;
 
 namespace CsbBuilder
@@ -54,13 +56,17 @@ namespace CsbBuilder
 
         private void button1_Click(object sender, EventArgs e)
         {
-            using (FolderBrowserDialog selectFolder = new FolderBrowserDialog())
+            VistaFolderBrowserDialog selectFolder = new VistaFolderBrowserDialog
             {
-                if (selectFolder.ShowDialog() == DialogResult.OK)
-                {
-                    maskedTextBox2.Text = selectFolder.SelectedPath;
-                }
+
+            };
+            {
+                if (selectFolder.ShowDialog() == true)
+               {
+                maskedTextBox2.Text = selectFolder.SelectedPath;
+               }
             }
+           
         }
 
         private void maskedTextBox2_TextChanged(object sender, EventArgs e)
