@@ -125,7 +125,7 @@ namespace CsbBuilder.Importer
                     else
                     {
                         aaxArchive.Load(soundElementTable.Data);
-
+                    }
 
                         foreach (CriAaxEntry entry in aaxArchive.ToArray())
                         {
@@ -142,12 +142,12 @@ namespace CsbBuilder.Importer
                                 soundElementNode.Loop = Path.GetFileName(outputFileName);
                             }
 
-                            else
+                            if (soundElementNode.Streaming == false)
                             {
                                 extractor.Add(soundElementTable.Data, outputFileName, entry.Position, entry.Length);
                             }
                         }
-                    }
+
                         project.SoundElementNodes.Add(soundElementNode);
                     }
 
@@ -325,8 +325,14 @@ namespace CsbBuilder.Importer
                         if (!string.IsNullOrEmpty(synthTable.AisacSetName))
                         {
                             string[] aisacs = synthTable.AisacSetName.Split(new char[] { (char)0x0A }, StringSplitOptions.RemoveEmptyEntries);
-                            string[] name = aisacs[0].Split(new string[] { "::" }, StringSplitOptions.None);
-                            synthNode.AisacReference = name[1]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                            for (int ac = 0; ac < aisacs.Count(); ac++)
+                            {
+                               string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
+                               for (int nc = 0; nc < name.Count(); nc++)
+                               {
+                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                               }
+                            }
                         }
 
                         if (!string.IsNullOrEmpty(synthTable.VoiceLimitGroupName))
@@ -617,8 +623,14 @@ namespace CsbBuilder.Importer
                     if (!string.IsNullOrEmpty(synthTable.AisacSetName))
                     {
                         string[] aisacs = synthTable.AisacSetName.Split(new char[] { (char)0x0A }, StringSplitOptions.RemoveEmptyEntries);
-                        string[] name = aisacs[0].Split(new string[] { "::" }, StringSplitOptions.None);
-                        synthNode.AisacReference = name[1]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                        for(int ac = 0; ac < aisacs.Count(); ac++)
+                        {
+                            string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
+                            for (int nc = 0; nc < aisacs.Count(); nc++)
+                            {
+                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                            }                            
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(synthTable.VoiceLimitGroupName))
