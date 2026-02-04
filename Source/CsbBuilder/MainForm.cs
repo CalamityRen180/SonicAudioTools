@@ -2335,24 +2335,24 @@ namespace CsbBuilder
 
         private void extractAAXToFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog
+            VistaOpenFileDialog openFileDialog = new VistaOpenFileDialog
             {
                 Title = "Extract AAX files",
                 FileName = "Select AAX files you want to extract and press Open",
                 Filter = "AAX Files|*.aax",
                 DefaultExt = "aax",
                 Multiselect = true,
-            })
+            };
             {
-                if (openFileDialog.ShowDialog(this) == DialogResult.OK)
+                if (openFileDialog.ShowDialog() == true)
                 {
-                    using (SaveFileDialog saveFileDialog = new SaveFileDialog
+                    VistaSaveFileDialog saveFileDialog = new VistaSaveFileDialog
                     {
                         Title = "Select output directory",
                         FileName = "Enter into a directory and press Save",
-                    })
+                    };
                     {
-                        if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
+                        if (saveFileDialog.ShowDialog() == true)
                         {
                             DataExtractor extractor = new DataExtractor();
                             extractor.EnableThreading = Settings.EnableThreading;
