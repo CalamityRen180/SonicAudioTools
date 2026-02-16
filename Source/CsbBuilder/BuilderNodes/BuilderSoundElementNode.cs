@@ -33,6 +33,7 @@ namespace CsbBuilder.BuilderNodes
         [Description("Sample rate of audio files. This information is used instead of the metadata in audio files.")]
         public uint SampleRate { get; set; }
 
+        [Browsable(false)]
         [ReadOnly(true)]
         [Category("General"), DisplayName("Sample Count")]
         [Description("Sample count of audio files added together.")]

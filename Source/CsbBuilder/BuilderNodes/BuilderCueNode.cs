@@ -20,9 +20,5 @@ namespace CsbBuilder.BuilderNodes
 
         [Category("General"), DisplayName("User Comment")]
         public string UserComment { get; set; }
-
-        [Category("General")]
-        [Description("Flags of this cue. Values are unknown.")]
-        public byte Flags { get; set; }
     }
 }

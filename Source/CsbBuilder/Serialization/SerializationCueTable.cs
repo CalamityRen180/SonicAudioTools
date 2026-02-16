@@ -10,7 +10,6 @@ namespace CsbBuilder.Serialization
         private uint idField = 0;
         private string synthField = string.Empty;
         private string udataField = string.Empty;
-        private byte flagsField = 0;
 
         [CriField("name", 0)]
         public string Name
@@ -61,19 +60,6 @@ namespace CsbBuilder.Serialization
             set
             {
                 udataField = value;
-            }
-        }
-
-        [CriField("flags", 4)]
-        public byte Flags
-        {
-            get
-            {
-                return flagsField;
-            }
-            set
-            {
-                flagsField = value;
             }
         }
     }

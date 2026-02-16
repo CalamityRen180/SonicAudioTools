@@ -20,9 +20,6 @@ namespace CsbBuilder.BuilderNodes
         [Category("Graph")]
         public List<BuilderAisacGraphNode> Graphs { get; set; }
 
-        [Category("Graph"), DisplayName("Random Range")]
-        public byte RandomRange { get; set; }
-
         public BuilderAisacNode()
         {
             Graphs = new List<BuilderAisacGraphNode>();

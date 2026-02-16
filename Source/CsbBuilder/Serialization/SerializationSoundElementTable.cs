@@ -12,7 +12,6 @@ namespace CsbBuilder.Serialization
         private byte nchField = 0;
         private bool stmflgField = false;
         private uint sfreqField = 0;
-        private uint nsmplField = 0;
 
         [CriField("name", 0)]
         public string Name
@@ -89,19 +88,6 @@ namespace CsbBuilder.Serialization
             set
             {
                 sfreqField = value;
-            }
-        }
-
-        [CriField("nsmpl", 6)]
-        public uint NumberSamples
-        {
-            get
-            {
-                return nsmplField;
-            }
-            set
-            {
-                nsmplField = value;
             }
         }
     }

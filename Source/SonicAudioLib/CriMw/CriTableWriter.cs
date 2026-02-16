@@ -148,6 +148,27 @@ namespace SonicAudioLib.CriMw
             status = Status.FieldCollection;
         }
 
+        /// <summary>
+        /// Pre-registers a string in the string pool without writing anything
+        /// to the output stream. Useful for ensuring certain strings (e.g., all
+        /// field names) appear before other strings (e.g., field values) in the
+        /// string pool, matching the original CRI tool layout for specific tables.
+        /// </summary>
+        public void PreRegisterString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            if (settings.RemoveDuplicateStrings && stringPool.ContainsString(value))
+            {
+                return;
+            }
+
+            stringPool.Put(value);
+        }
+
         public void WriteField(string fieldName, Type fieldType, object defaultValue)
         {
             if (status != Status.FieldCollection)
@@ -161,7 +182,7 @@ namespace SonicAudioLib.CriMw
             {
                 fieldFlag |= CriFieldFlag.Name;
             }
-            
+
             if (defaultValue != null)
             {
                 fieldFlag |= CriFieldFlag.DefaultValue;
@@ -310,6 +331,14 @@ namespace SonicAudioLib.CriMw
             if (status != Status.Row)
             {
                 throw new InvalidOperationException("Attempted to end row when the status wasn't Row");
+            }
+
+            // After the first row (RowCount == 1), align the string pool if requested.
+            // This matches the original CRI tool behavior for tables like TBLCUE where
+            // 2-byte alignment padding is inserted after the first row's strings only.
+            if (header.RowCount == 1 && settings.AlignStringPoolAfterFirstRow)
+            {
+                stringPool.Align(settings.FirstRowStringPoolAlignment);
             }
 
             status = Status.Idle;
@@ -470,6 +499,9 @@ namespace SonicAudioLib.CriMw
         private Encoding encodingType = Encoding.GetEncoding("shift-jis");
         private bool removeDuplicateStrings = true;
         private bool enableMask = false;
+        private bool preRegisterFieldNames = false;
+        private bool alignStringPoolAfterFirstRow = false;
+        private int firstRowStringPoolAlignment = 2;
 
         public uint Align
         {
@@ -559,6 +591,69 @@ namespace SonicAudioLib.CriMw
             }
         }
 
+        /// <summary>
+        /// When true, CriTableSerializer will pre-register all field names in the
+        /// string pool before writing field definitions. This ensures field name
+        /// strings appear before field value strings in the pool, matching the
+        /// original CRI tool layout for specific tables (e.g., TBLISC).
+        /// Default is false.
+        /// </summary>
+        public bool PreRegisterFieldNames
+        {
+            get
+            {
+                return preRegisterFieldNames;
+            }
+
+            set
+            {
+                preRegisterFieldNames = value;
+            }
+        }
+
+        /// <summary>
+        /// When true, the string pool will be aligned to FirstRowStringPoolAlignment
+        /// bytes after the first row's strings are written. This matches the original
+        /// CRI tool behavior for tables like TBLCUE where 2-byte alignment padding
+        /// is inserted only after the first cue's strings.
+        /// Default is false.
+        /// </summary>
+        public bool AlignStringPoolAfterFirstRow
+        {
+            get
+            {
+                return alignStringPoolAfterFirstRow;
+            }
+
+            set
+            {
+                alignStringPoolAfterFirstRow = value;
+            }
+        }
+
+        /// <summary>
+        /// The byte boundary to align the string pool to after the first row.
+        /// Only used when AlignStringPoolAfterFirstRow is true.
+        /// Default is 2.
+        /// </summary>
+        public int FirstRowStringPoolAlignment
+        {
+            get
+            {
+                return firstRowStringPoolAlignment;
+            }
+
+            set
+            {
+                if (value <= 0)
+                {
+                    value = 1;
+                }
+
+                firstRowStringPoolAlignment = value;
+            }
+        }
+
         public uint MaskXor { get; set; }
         public uint MaskXorMultiplier { get; set; }
 
@@ -568,7 +663,7 @@ namespace SonicAudioLib.CriMw
             {
                 return new CriTableWriterSettings()
                 {
-                    Align = 8,
+                    Align = 1,
                     PutBlankString = true,
                     RemoveDuplicateStrings = true,
                 };

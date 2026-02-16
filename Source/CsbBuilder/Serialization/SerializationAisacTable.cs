@@ -10,7 +10,6 @@ namespace CsbBuilder.Serialization
         private string ptnameField = string.Empty;
         private byte typeField = 0;
         private byte[] grphField = null;
-        private byte rndrngField = 0;
 
         [CriField("name", 0)]
         public string Name
@@ -61,19 +60,6 @@ namespace CsbBuilder.Serialization
             set
             {
                 grphField = value;
-            }
-        }
-
-        [CriField("rndrng", 4)]
-        public byte RandomRange
-        {
-            get
-            {
-                return rndrngField;
-            }
-            set
-            {
-                rndrngField = value;
             }
         }
     }

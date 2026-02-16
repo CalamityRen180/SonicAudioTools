@@ -75,7 +75,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 // Ignore the properties that are not supportable
                 if (propertyInfo.PropertyType != typeof(FileInfo) &&
                     propertyInfo.PropertyType != typeof(Stream) &&
-                    propertyInfo.PropertyType != typeof(bool) &&    
+                    propertyInfo.PropertyType != typeof(bool) &&
                     !propertyInfo.PropertyType.IsEnum &&
                     !CriField.FieldTypes.Contains(propertyInfo.PropertyType))
                 {
@@ -98,6 +98,27 @@ namespace SonicAudioLib.CriMw.Serialization
                 sortedProperties.Add(order, propertyInfo);
             }
 
+            // When PreRegisterFieldNames is enabled, pre-register ALL
+            // field names in the string pool BEFORE writing any field definitions.
+            // This ensures field name strings appear before field value strings in
+            // the pool, matching the original CRI tool layout for specific tables.
+            if (settings.PreRegisterFieldNames)
+            {
+                foreach (var keyValuePair in sortedProperties)
+                {
+                    PropertyInfo propertyInfo = keyValuePair.Value;
+                    CriFieldAttribute fieldAttribute = propertyInfo.GetCustomAttribute<CriFieldAttribute>();
+
+                    string fieldName = propertyInfo.Name;
+                    if (fieldAttribute != null && !string.IsNullOrEmpty(fieldAttribute.FieldName))
+                    {
+                        fieldName = fieldAttribute.FieldName;
+                    }
+
+                    tableWriter.PreRegisterString(fieldName);
+                }
+            }
+
             tableWriter.WriteStartFieldCollection();
             foreach (var keyValuePair in sortedProperties)
             {
@@ -107,7 +128,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 string fieldName = propertyInfo.Name;
                 Type fieldType = propertyInfo.PropertyType;
                 object defaultValue = null;
-    
+
                 if (fieldType == typeof(FileInfo) || fieldType == typeof(Stream))
                 {
                     fieldType = typeof(byte[]);
@@ -127,7 +148,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 {
                     if (!string.IsNullOrEmpty(fieldAttribute.FieldName))
                     {
-                        fieldName = fieldAttribute.FieldName;   
+                        fieldName = fieldAttribute.FieldName;
                     }
                 }
 

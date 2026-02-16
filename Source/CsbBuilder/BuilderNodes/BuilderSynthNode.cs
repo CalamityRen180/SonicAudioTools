@@ -219,102 +219,7 @@ namespace CsbBuilder.BuilderNodes
         [Category("Voice Limit"), DisplayName("Voice Limit Pcdlt (Unknown)")]
         public sbyte VoiceLimitPcdlt { get; set; }
 
-        [Category("Pan 3D"), DisplayName("Pan 3D Volume Offset")]
-        public short Pan3dVolumeOffset { get; set; }
-
-        [Category("Pan 3D"), DisplayName("Pan 3D Volume Gain")]
-        public short Pan3dVolumeGain { get; set; }
-
-        [Category("Pan 3D"), DisplayName("Pan 3D Angle Offset")]
-        public short Pan3dAngleOffset { get; set; }
-
-        [Category("Pan 3D"), DisplayName("Pan 3D Angle Gain")]
-        public short Pan3dAngleGain { get; set; }
-
-        [Category("Pan 3D"), DisplayName("Pan 3D Distance Offset")]
-        public short Pan3dDistanceOffset { get; set; }
-
-        [Category("Pan 3D"), DisplayName("Pan 3D Distance Gain")]
-        public short Pan3dDistanceGain { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 0 Gain")]
-        public byte Dry0g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 1 Gain")]
-        public byte Dry1g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 2 Gain")]
-        public byte Dry2g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 3 Gain")]
-        public byte Dry3g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 4 Gain")]
-        public byte Dry4g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 5 Gain")]
-        public byte Dry5g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 6 Gain")]
-        public byte Dry6g { get; set; }
-
-        [Category("Dryness"), DisplayName("Dry 7 Gain")]
-        public byte Dry7g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 0 Gain")]
-        public byte Wet0g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 1 Gain")]
-        public byte Wet1g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 2 Gain")]
-        public byte Wet2g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 3 Gain")]
-        public byte Wet3g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 4 Gain")]
-        public byte Wet4g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 5 Gain")]
-        public byte Wet5g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 6 Gain")]
-        public byte Wet6g { get; set; }
-
-        [Category("Wetness"), DisplayName("Wet 7 Gain")]
-        public byte Wet7g { get; set; }
-
-        [Category("Filter 1 (Unknown)"), DisplayName("Filter 1 Type")]
-        public byte Filter1Type { get; set; }
-
-        [Category("Filter 1 (Unknown)"), DisplayName("Filter 1 Cutoff Offset")]
-        public ushort Filter1CutoffOffset { get; set; }
-
-        [Category("Filter 1 (Unknown)"), DisplayName("Filter 1 Cutoff Gain")]
-        public ushort Filter1CutoffGain { get; set; }
-
-        [Category("Filter 1 (Unknown)"), DisplayName("Filter 1 RESO (Unknown) Offset")]
-        public ushort Filter1ResoOffset { get; set; }
-
-        [Category("Filter 1 (Unknown)"), DisplayName("Filter 1 RESO (Unknown) Gain")]
-        public ushort Filter1ResoGain { get; set; }
-
-        [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Type")]
-        public byte Filter2Type { get; set; }
-
-        [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Cutoff Lower Offset")]
-        public ushort Filter2CutoffLowerOffset { get; set; }
-
-        [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Cutoff Lower Gain")]
-        public ushort Filter2CutoffLowerGain { get; set; }
-
-        [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Cutoff Higher Offset")]
-        public ushort Filter2CutoffHigherOffset { get; set; }
-
-        [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Cutoff Higher Gain")]
-        public ushort Filter2CutoffHigherGain { get; set; }
-
+        [Browsable(false)]
         [Category("General"), DisplayName("Playback Probability")]
         [Description("Probability of this synth being played. Lower values make it less probable to play. Max is 100.")]
         public byte PlaybackProbability
@@ -335,18 +240,6 @@ namespace CsbBuilder.BuilderNodes
             }
         }
 
-        [Category("Unknown"), DisplayName("N LMT Children")]
-        public byte NLmtChildren { get; set; }
-
-        [Category("General"), DisplayName("Repeat")]
-        public byte Repeat { get; set; }
-
-        [Category("General"), DisplayName("Combo Time")]
-        public uint ComboTime { get; set; }
-
-        [Category("General"), DisplayName("Combo Loop Back")]
-        public byte ComboLoopBack { get; set; }
-
         [Browsable(false)]
         public bool PlayThisTurn
         {
@@ -355,13 +248,13 @@ namespace CsbBuilder.BuilderNodes
                 return random.Next(100) <= PlaybackProbability;
             }
         }
-		
-		[Browsable(false)]
+
+        [Browsable(false)]
         public int RandomChildNode
         {
             get
             {
-                if (playbackType == BuilderSynthPlaybackType.RandomNoRepeat)
+                if (playbackType == BuilderSynthPlaybackType.RandomNoRepeat && Children.Count > 1)
                 {
                     int randomChild = random.Next(Children.Count);
 
@@ -399,34 +292,6 @@ namespace CsbBuilder.BuilderNodes
             Volume = 1000;
 
             EgSustain = 1000;
-
-            Dry0g = 255;
-            Dry1g = 255;
-            Dry2g = 255;
-            Dry3g = 255;
-            Dry4g = 255;
-            Dry5g = 255;
-            Dry6g = 255;
-            Dry7g = 255;
-
-            Wet0g = 255;
-            Wet1g = 255;
-            Wet2g = 255;
-            Wet3g = 255;
-            Wet4g = 255;
-            Wet5g = 255;
-            Wet6g = 255;
-            Wet7g = 255;
-
-            Pan3dAngleGain = 1000;
-            Pan3dDistanceGain = 1000;
-            Pan3dDistanceOffset = 1000;
-            Pan3dVolumeGain = 1000;
-            Pan3dVolumeOffset = 1000;
-
-            Filter2CutoffHigherGain = 1000;
-            Filter2CutoffHigherOffset = 1000;
-            Filter2CutoffLowerGain = 1000;
         }
     }
 }
