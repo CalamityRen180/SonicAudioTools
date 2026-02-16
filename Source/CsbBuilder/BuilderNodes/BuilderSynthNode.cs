@@ -361,7 +361,7 @@ namespace CsbBuilder.BuilderNodes
         {
             get
             {
-                if (playbackType == BuilderSynthPlaybackType.RandomNoRepeat)
+                if (playbackType == BuilderSynthPlaybackType.RandomNoRepeat && Children.Count > 1)
                 {
                     int randomChild = random.Next(Children.Count);
 
