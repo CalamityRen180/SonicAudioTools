@@ -90,11 +90,6 @@ namespace CsbBuilder.Serialization
         private ushort f2_coflgField = 1000;
         private ushort f2_cofhoField = 0;
         private ushort f2_cofhgField = 1000;
-        private byte probabilityField = 100;
-        private byte n_lmt_childrenField = 0;
-        private byte repeatField = 0;
-        private uint combo_timeField = 0;
-        private byte combo_loop_backField = 0;
 
         [CriField("synname", 0)]
         public string SynthName
@@ -1185,71 +1180,6 @@ namespace CsbBuilder.Serialization
             set
             {
                 f2_cofhgField = value;
-            }
-        }
-
-        [CriField("probability", 84)]
-        public byte Probability
-        {
-            get
-            {
-                return probabilityField;
-            }
-            set
-            {
-                probabilityField = value;
-            }
-        }
-
-        [CriField("n_lmt_children", 85)]
-        public byte NumberLmtChildren
-        {
-            get
-            {
-                return n_lmt_childrenField;
-            }
-            set
-            {
-                n_lmt_childrenField = value;
-            }
-        }
-
-        [CriField("repeat", 86)]
-        public byte Repeat
-        {
-            get
-            {
-                return repeatField;
-            }
-            set
-            {
-                repeatField = value;
-            }
-        }
-
-        [CriField("combo_time", 87)]
-        public uint ComboTime
-        {
-            get
-            {
-                return combo_timeField;
-            }
-            set
-            {
-                combo_timeField = value;
-            }
-        }
-
-        [CriField("combo_loop_back", 88)]
-        public byte ComboLoopBack
-        {
-            get
-            {
-                return combo_loop_backField;
-            }
-            set
-            {
-                combo_loop_backField = value;
             }
         }
     }

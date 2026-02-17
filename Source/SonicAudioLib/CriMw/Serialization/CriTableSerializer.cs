@@ -98,6 +98,28 @@ namespace SonicAudioLib.CriMw.Serialization
                 sortedProperties.Add(order, propertyInfo);
             }
 
+            // When PreRegisterFieldNames is enabled, pre-register ALL
+            // field names in the string pool BEFORE writing any field definitions.
+            // This ensures field name strings appear before field value strings in
+            // the pool, matching the original CRI tool layout for specific tables.
+            if (settings.PreRegisterFieldNames)
+            {
+                foreach (var keyValuePair in sortedProperties)
+                {
+                    PropertyInfo propertyInfo = keyValuePair.Value;
+                    CriFieldAttribute fieldAttribute = propertyInfo.GetCustomAttribute<CriFieldAttribute>();
+
+                    string fieldName = propertyInfo.Name;
+                    if (fieldAttribute != null && !string.IsNullOrEmpty(fieldAttribute.FieldName))
+                    {
+                        fieldName = fieldAttribute.FieldName;
+                    }
+
+                    tableWriter.PreRegisterString(fieldName);
+                }
+            }
+
+
             tableWriter.WriteStartFieldCollection();
             foreach (var keyValuePair in sortedProperties)
             {

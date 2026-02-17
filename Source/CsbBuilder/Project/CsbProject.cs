@@ -159,10 +159,6 @@ namespace CsbBuilder.Project
 
         public void Order(TreeView cueTree, TreeView synthTree, TreeView soundElementTree, TreeView aisacTree, TreeView voiceLimitGroupTree)
         {
-            cueNodes = cueNodes.OrderBy(cue => cueTree.Nodes.IndexOfKey(cue.Name)).ToList();
-            synthNodes = synthNodes.OrderBy(synth => GetAbsoluteIndex(synth.Name, synthTree)).ToList();
-            soundElementNodes = soundElementNodes.OrderBy(soundElement => soundElementTree.FindNodeByFullPath(soundElement.Name).Index).ToList();
-            aisacNodes = aisacNodes.OrderBy(aisac => aisacTree.FindNodeByFullPath(aisac.Name).Index).ToList();
             voiceLimitGroupNodes = voiceLimitGroupNodes.OrderBy(voiceLimitGroup => voiceLimitGroupTree.Nodes.IndexOfKey(voiceLimitGroup.Name)).ToList();
 
             synthNodes.ForEach(synth =>

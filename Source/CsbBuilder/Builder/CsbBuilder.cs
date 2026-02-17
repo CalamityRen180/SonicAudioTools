@@ -20,6 +20,8 @@ namespace CsbBuilder.Builder
         {
                 CriCpkArchive cpkArchive = new CriCpkArchive();
 
+                cpkArchive.Align = MainForm.Settings.CpkAlign;
+
                 DirectoryInfo outputDirectory = new DirectoryInfo(Path.GetDirectoryName(outputFileName));
 
                 List<SerializationCueSheetTable> cueSheetTables = new List<SerializationCueSheetTable>();
@@ -141,11 +143,6 @@ namespace CsbBuilder.Builder
                         F2CofLowGain = synthNode.Filter2CutoffLowerGain,
                         F2CofHighOffset = synthNode.Filter2CutoffHigherOffset,
                         F2CofHighGain = synthNode.Filter2CutoffHigherGain,
-                        Probability = synthNode.PlaybackProbability,
-                        NumberLmtChildren = synthNode.NLmtChildren,
-                        Repeat = synthNode.Repeat,
-                        ComboTime = synthNode.ComboTime,
-                        ComboLoopBack = synthNode.ComboLoopBack,
                     };
 
                     if (synthNode.Type == BuilderSynthType.Single)
@@ -274,8 +271,12 @@ namespace CsbBuilder.Builder
                     TableType = 4,
                 });
 
-                // Serialize the aisacs.
-                List<SerializationAisacTable> aisacTables = new List<SerializationAisacTable>();
+            // TBLISC requires field names pre-registered before values.
+            CriTableWriterSettings aisacSettings = CriTableWriterSettings.AdxSettings;
+            aisacSettings.PreRegisterFieldNames = true;
+
+            // Serialize the aisacs.
+            List<SerializationAisacTable> aisacTables = new List<SerializationAisacTable>();
                 foreach (BuilderAisacNode aisacNode in project.AisacNodes)
                 {
                     List<SerializationAisacGraphTable> graphTables = new List<SerializationAisacGraphTable>();
@@ -303,18 +304,18 @@ namespace CsbBuilder.Builder
                     }
 
                     aisacTables.Add(new SerializationAisacTable
-                    {
-                        Graph = CriTableSerializer.Serialize(graphTables, CriTableWriterSettings.AdxSettings),
+                    {                        
                         Name = aisacNode.AisacName,
                         PathName = aisacNode.Name,
                         Type = aisacNode.Type,
+                        Graph = CriTableSerializer.Serialize(graphTables, CriTableWriterSettings.AdxSettings),
                         RandomRange = aisacNode.RandomRange,
                     });
                 }
 
                 cueSheetTables.Add(new SerializationCueSheetTable
                 {
-                    TableData = CriTableSerializer.Serialize(aisacTables, CriTableWriterSettings.AdxSettings),
+                    TableData = CriTableSerializer.Serialize(aisacTables, aisacSettings),
                     Name = "ISAAC",
                     TableType = 5,
                 });

@@ -148,6 +148,26 @@ namespace SonicAudioLib.CriMw
             status = Status.FieldCollection;
         }
 
+        /// <summary>
+        /// Pre-registers a string in the string pool without writing anything
+        /// to the output stream. Useful for ensuring certain strings (e.g., all
+        /// field names) appear before other strings (e.g., field values) in the
+        /// string pool, matching the original CRI tool layout for specific tables.
+        /// </summary>
+        public void PreRegisterString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            if (settings.RemoveDuplicateStrings && stringPool.ContainsString(value))
+            {
+                return;
+            }
+
+            stringPool.Put(value);
+        }
         public void WriteField(string fieldName, Type fieldType, object defaultValue)
         {
             if (status != Status.FieldCollection)
@@ -470,6 +490,7 @@ namespace SonicAudioLib.CriMw
         private Encoding encodingType = Encoding.GetEncoding("shift-jis");
         private bool removeDuplicateStrings = true;
         private bool enableMask = false;
+        private bool preRegisterFieldNames = false;
 
         public uint Align
         {
@@ -559,6 +580,25 @@ namespace SonicAudioLib.CriMw
             }
         }
 
+        /// <summary>
+        /// When true, CriTableSerializer will pre-register all field names in the
+        /// string pool before writing field definitions. This ensures field name
+        /// strings appear before field value strings in the pool, matching the
+        /// original CRI tool layout for specific tables (e.g., TBLISC).
+        /// Default is false.
+        /// </summary>
+        public bool PreRegisterFieldNames
+        {
+            get
+            {
+                return preRegisterFieldNames;
+            }
+
+            set
+            {
+                preRegisterFieldNames = value;
+            }
+        }
         public uint MaskXor { get; set; }
         public uint MaskXorMultiplier { get; set; }
 

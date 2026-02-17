@@ -295,11 +295,6 @@ namespace CsbBuilder.Importer
                     synthNode.Filter2CutoffLowerGain = synthTable.F2CofLowGain;
                     synthNode.Filter2CutoffHigherOffset = synthTable.F2CofHighOffset;
                     synthNode.Filter2CutoffHigherGain = synthTable.F2CofHighGain;
-                    synthNode.PlaybackProbability = synthTable.Probability;
-                    synthNode.NLmtChildren = synthTable.NumberLmtChildren;
-                    synthNode.Repeat = synthTable.Repeat;
-                    synthNode.ComboTime = synthTable.ComboTime;
-                    synthNode.ComboLoopBack = synthTable.ComboLoopBack;
 
                     project.SynthNodes.Add(synthNode);
                 }
@@ -593,11 +588,6 @@ namespace CsbBuilder.Importer
                     synthNode.Filter2CutoffLowerGain = synthTable.F2CofLowGain;
                     synthNode.Filter2CutoffHigherOffset = synthTable.F2CofHighOffset;
                     synthNode.Filter2CutoffHigherGain = synthTable.F2CofHighGain;
-                    synthNode.PlaybackProbability = synthTable.Probability;
-                    synthNode.NLmtChildren = synthTable.NumberLmtChildren;
-                    synthNode.Repeat = synthTable.Repeat;
-                    synthNode.ComboTime = synthTable.ComboTime;
-                    synthNode.ComboLoopBack = synthTable.ComboLoopBack;
 
                     project.SynthNodes.Add(synthNode);
                 }

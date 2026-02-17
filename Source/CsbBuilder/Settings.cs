@@ -27,9 +27,19 @@ namespace CsbBuilder.Project
             AsioOut,
         }
 
+        private ushort cpkAlign;
+
         [DisplayName("Name node after its parent"), Category("General")]
         [Description("Determines whether a node is going to be named after its parent when created.")]
         public bool NameNodeAfterParent { get; set; }
+
+        [DisplayName("CpkAlign"), Category("Stream")]
+        [Description("What Data Alignment the streamed audio will have on a CPK file.")]
+        public ushort CpkAlign
+        {
+            get { return cpkAlign; }
+            set { cpkAlign = value == 0 ? (ushort)1 : value; }
+        }
 
         [DisplayName("EnableCPKCreation"), Category("Stream")]
         [Description("Wheater we either create CPK files with the streamed audio files OR we write the streamed audio files externally.")]
@@ -128,6 +138,7 @@ namespace CsbBuilder.Project
             ImportedCsbProjectDirectory = ProjectDirectory.DirectoryOfCsb;
             RenameToSoundElement = true;
             EnableThreading = true;
+            CpkAlign = 512;
             EnableCPKCreation = true;
             MaxThreads = 4;
             LoopCount = 2;

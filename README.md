@@ -1,10 +1,6 @@
 # Sonic Audio Tools
 
-A set of tools to modify CRIWARE file formats.
-
-## Disclaimer
-
-This project is no longer maintained. I have not done any significant development for several years, and do not have any plans to do so. However, if you wish to contribute to the project, I'm open to accepting pull requests.
+A set of tools to modify CRIWARE file formats (specifically Sonic Unleashed, but it can be for other games from more or less the same time period).
 
 ## Releases
 
@@ -27,20 +23,6 @@ If you wish to see more detailed information about the projects, visit the [wiki
 ### [Sonic Audio Library](https://github.com/blueskythlikesclouds/SonicAudioTools/tree/master/Source/SonicAudioLib)
 
 This is the main library of the solution.  Contains classes for IO and file formats.
-
-### [ACB Editor](https://github.com/blueskythlikesclouds/SonicAudioTools/tree/master/Source/AcbEditor)
-
-This tool allows you to edit the audio content of an ACB file.  
-
-### [ACB Finder](https://github.com/blueskythlikesclouds/SonicAudioTools/tree/master/Source/AcbFinder)
-
-This tool allows you to find AWB files and link them back to the ACB, required in extracting certain ACB files.
-Useful for games where the AWB files may be renamed or hidden (like Phantasy Star Online 2)
-
-### [ACB Injector](https://github.com/blueskythlikesclouds/SonicAudioTools/tree/master/Source/AcbInjector)
-
-This tool allows you to inject audio file directly into ACB without repacking its AWB.  
-Useful for background music ACBs that use huge AWB files.
 
 ### [CSB Builder](https://github.com/blueskythlikesclouds/SonicAudioTools/tree/master/Source/CsbBuilder)
 

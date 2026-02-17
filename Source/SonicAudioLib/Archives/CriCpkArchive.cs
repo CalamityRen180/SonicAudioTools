@@ -66,11 +66,6 @@ namespace SonicAudioLib.Archives
 
             set
             {
-                if (align != 1)
-                {
-                    throw new NotImplementedException("Alignment is currently not implemented.");
-                }
-
                 align = value;
             }
         }
@@ -288,7 +283,6 @@ namespace SonicAudioLib.Archives
                 {
                     cpkSection.Writer.WriteField("TocOffset", typeof(ulong));
                     cpkSection.Writer.WriteField("TocSize", typeof(ulong));
-                    cpkSection.Writer.WriteField("TocCrc", typeof(uint), null);
                     cpkSection.Writer.WriteField("EtocOffset", typeof(ulong));
                     cpkSection.Writer.WriteField("EtocSize", typeof(ulong));
                 }
@@ -297,7 +291,6 @@ namespace SonicAudioLib.Archives
                 {
                     cpkSection.Writer.WriteField("TocOffset", typeof(ulong), null);
                     cpkSection.Writer.WriteField("TocSize", typeof(ulong), null);
-                    cpkSection.Writer.WriteField("TocCrc", typeof(uint), null);
                     cpkSection.Writer.WriteField("EtocOffset", typeof(ulong), null);
                     cpkSection.Writer.WriteField("EtocSize", typeof(ulong), null);
                 }
@@ -306,19 +299,16 @@ namespace SonicAudioLib.Archives
                 {
                     cpkSection.Writer.WriteField("ItocOffset", typeof(ulong));
                     cpkSection.Writer.WriteField("ItocSize", typeof(ulong));
-                    cpkSection.Writer.WriteField("ItocCrc", typeof(uint), null);
                 }
 
                 else
                 {
                     cpkSection.Writer.WriteField("ItocOffset", typeof(ulong), null);
                     cpkSection.Writer.WriteField("ItocSize", typeof(ulong), null);
-                    cpkSection.Writer.WriteField("ItocCrc", typeof(uint), null);
                 }
 
                 cpkSection.Writer.WriteField("GtocOffset", typeof(ulong), null);
                 cpkSection.Writer.WriteField("GtocSize", typeof(ulong), null);
-                cpkSection.Writer.WriteField("GtocCrc", typeof(uint), null);
 
                 cpkSection.Writer.WriteField("EnabledPackedSize", typeof(ulong));
                 cpkSection.Writer.WriteField("EnabledDataSize", typeof(ulong));
@@ -336,9 +326,6 @@ namespace SonicAudioLib.Archives
                 cpkSection.Writer.WriteField("Revision", typeof(ushort));
                 cpkSection.Writer.WriteField("Align", typeof(ushort));
                 cpkSection.Writer.WriteField("Sorted", typeof(ushort));
-                cpkSection.Writer.WriteField("EID", typeof(ushort), null);
-
-                cpkSection.Writer.WriteField("CpkMode", typeof(uint));
                 cpkSection.Writer.WriteField("Tvers", typeof(string));
 
                 if (!string.IsNullOrEmpty(Comment))
@@ -351,8 +338,6 @@ namespace SonicAudioLib.Archives
                     cpkSection.Writer.WriteField("Comment", typeof(string), null);
                 }
 
-                cpkSection.Writer.WriteField("Codec", typeof(uint));
-                cpkSection.Writer.WriteField("DpkItoc", typeof(uint));
 
                 MemoryStream tocMemoryStream = null;
                 MemoryStream itocMemoryStream = null;
@@ -370,12 +355,34 @@ namespace SonicAudioLib.Archives
                     {
                         tocSection.Writer.WriteStartTable("CpkTocInfo");
 
-                        tocSection.Writer.WriteField("DirName", typeof(string));
+                        // Determine if DirName should be a constant (default) field.
+                        // When multiple files all share the same non-empty directory name,
+                        // the original CRI tool writes DirName as a constant rather than
+                        // per-row, which places the directory string right after the field
+                        // name in the string pool.
+                        var distinctDirNames = orderedEntries
+                            .Select(e => (e.DirectoryName ?? "").Replace('\\', '/'))
+                            .Distinct()
+                            .ToList();
+
+                        bool useConstantDirName = orderedEntries.Count > 1
+                            && distinctDirNames.Count == 1
+                            && !string.IsNullOrEmpty(distinctDirNames[0]);
+
+                        if (useConstantDirName)
+                        {
+                            tocSection.Writer.WriteField("DirName", typeof(string), distinctDirNames[0]);
+                        }
+                        else
+                        {
+                            tocSection.Writer.WriteField("DirName", typeof(string));
+                        }
+
                         tocSection.Writer.WriteField("FileName", typeof(string));
                         tocSection.Writer.WriteField("FileSize", typeof(uint));
                         tocSection.Writer.WriteField("ExtractSize", typeof(uint));
                         tocSection.Writer.WriteField("FileOffset", typeof(ulong));
-                        tocSection.Writer.WriteField("ID", typeof(uint));
+                        tocSection.Writer.WriteField("Info", typeof(uint));
                         tocSection.Writer.WriteField("UserString", typeof(string));
 
                         etocSection.Writer.WriteStartTable("CpkEtocInfo");
@@ -542,8 +549,8 @@ namespace SonicAudioLib.Archives
 
                 cpkSection.Writer.WriteValue("Files", (uint)entries.Count);
 
-                cpkSection.Writer.WriteValue("Version", (ushort)7);
-                cpkSection.Writer.WriteValue("Revision", (ushort)2);
+                cpkSection.Writer.WriteValue("Version", (ushort)2);
+                cpkSection.Writer.WriteValue("Revision", (ushort)4);
                 cpkSection.Writer.WriteValue("Align", Align);
                 cpkSection.Writer.WriteValue("Sorted", (ushort)1);
 
@@ -669,7 +676,7 @@ namespace SonicAudioLib.Archives
 
         private DateTime DateTimeFromCpkDateTime(ulong dateTime)
         {
-            return dateTime > 0 ? 
+            return dateTime > 0 ?
                 new DateTime(
                     (int)(dateTime >> 48),          // Year (ushort)
                     (int)(dateTime >> 40) & 0xFF,   // Month (byte)
@@ -682,8 +689,8 @@ namespace SonicAudioLib.Archives
 
         private ulong CpkDateTimeFromDateTime(DateTime dateTime)
         {
-            return 
-                (ulong)dateTime.Year << 48 | 
+            return
+                (ulong)dateTime.Year << 48 |
                 (ulong)dateTime.Month << 40 |
                 (ulong)dateTime.Day << 32 |
                 (ulong)dateTime.Hour << 24 |

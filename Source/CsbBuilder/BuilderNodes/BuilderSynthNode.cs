@@ -315,6 +315,7 @@ namespace CsbBuilder.BuilderNodes
         [Category("Filter 2 (Unknown)"), DisplayName("Filter 2 Cutoff Higher Gain")]
         public ushort Filter2CutoffHigherGain { get; set; }
 
+        [Browsable(false)]
         [Category("General"), DisplayName("Playback Probability")]
         [Description("Probability of this synth being played. Lower values make it less probable to play. Max is 100.")]
         public byte PlaybackProbability
@@ -334,18 +335,6 @@ namespace CsbBuilder.BuilderNodes
                 playbackProbability = value > 100 ? (byte)100 : value;
             }
         }
-
-        [Category("Unknown"), DisplayName("N LMT Children")]
-        public byte NLmtChildren { get; set; }
-
-        [Category("General"), DisplayName("Repeat")]
-        public byte Repeat { get; set; }
-
-        [Category("General"), DisplayName("Combo Time")]
-        public uint ComboTime { get; set; }
-
-        [Category("General"), DisplayName("Combo Loop Back")]
-        public byte ComboLoopBack { get; set; }
 
         [Browsable(false)]
         public bool PlayThisTurn
