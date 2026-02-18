@@ -11,6 +11,47 @@ using System.Xml.Serialization;
 
 namespace CsbBuilder.Project
 {
+    public class CpkAlignConverter : TypeConverter
+    {
+        private static readonly ushort[] values =
+            { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            return new StandardValuesCollection(values);
+        }
+
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (sourceType == typeof(string))
+            {
+                return true;
+            }
+
+            return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            if (value is string text && ushort.TryParse(text, out ushort result))
+            {
+                return result;
+            }
+
+            return base.ConvertFrom(context, culture, value);
+        }
+    }
+
     public class Settings : ICloneable
     {
         public enum ProjectDirectory
@@ -27,19 +68,14 @@ namespace CsbBuilder.Project
             AsioOut,
         }
 
-        private ushort cpkAlign;
-
         [DisplayName("Name node after its parent"), Category("General")]
         [Description("Determines whether a node is going to be named after its parent when created.")]
         public bool NameNodeAfterParent { get; set; }
 
         [DisplayName("CpkAlign"), Category("Stream")]
         [Description("What Data Alignment the streamed audio will have on a CPK file.")]
-        public ushort CpkAlign
-        {
-            get { return cpkAlign; }
-            set { cpkAlign = value == 0 ? (ushort)1 : value; }
-        }
+        [TypeConverter(typeof(CpkAlignConverter))]
+        public ushort CpkAlign { get; set; }
 
         [DisplayName("EnableCPKCreation"), Category("Stream")]
         [Description("Wheater we either create CPK files with the streamed audio files OR we write the streamed audio files externally.")]
@@ -93,9 +129,9 @@ namespace CsbBuilder.Project
             string path = Path.ChangeExtension(Application.ExecutablePath, "xml");
 
             Settings settings = null;
-            
-                if (File.Exists(path))
-                {   
+
+            if (File.Exists(path))
+            {
                 XmlSerializer serializer = new XmlSerializer(typeof(Settings));
 
                 using (Stream source = File.OpenRead(path))
@@ -138,7 +174,7 @@ namespace CsbBuilder.Project
             ImportedCsbProjectDirectory = ProjectDirectory.DirectoryOfCsb;
             RenameToSoundElement = true;
             EnableThreading = true;
-            CpkAlign = 512;
+            CpkAlign = 1;
             EnableCPKCreation = true;
             MaxThreads = 4;
             LoopCount = 2;
