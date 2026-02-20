@@ -1972,6 +1972,16 @@ namespace CsbBuilder
             UpdateNodeNoRename(nodeToPaste);
             AddToProject(nodeToPaste);
 
+            // update the parent track's children if applicable
+            TreeNode parentNode = nodeToPaste.Parent;
+            if (parentNode != null && parentNode.TreeView == synthTree && parentNode.Tag is BuilderSynthNode parentSynthNode && nodeToPaste.Tag is BuilderSynthNode pastedSynthNode)
+            {
+                if (parentSynthNode.Type == BuilderSynthType.WithChildren)
+                {
+                    parentSynthNode.Children.Add(pastedSynthNode.Name);
+                }
+            }
+
             nodeToPaste.TreeView.SelectedNode = nodeToPaste;
             nodeToPaste.EnsureVisible();
         }
