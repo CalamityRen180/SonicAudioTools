@@ -1,6 +1,6 @@
-# Sonic Audio Tools
+# Sonic Audio Tools (unleashed-audio-tools branch)
 
-A set of tools to modify CRIWARE file formats (specifically Sonic Unleashed, but it can be for other games from more or less the same time period).
+A set of tools to modify CRIWARE file formats (specifically the CRIWARE file format version used in Sonic Unleashed, but it can be used for other games from more or less the same time period).
 
 ## Releases
 
