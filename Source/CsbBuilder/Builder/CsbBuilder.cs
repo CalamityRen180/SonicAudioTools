@@ -341,6 +341,15 @@ namespace CsbBuilder.Builder
                 // Finally, serialize the CSB file.
                 CriTableSerializer.Serialize(outputFileName, cueSheetTables, CriTableWriterSettings.AdxSettings, MainForm.Settings.BufferSize);
 
+            // If the output file is a CSE, mask the first 64 bytes of the root table.
+            if (Path.GetExtension(outputFileName).Equals(".cse", StringComparison.OrdinalIgnoreCase))
+            {
+                using (FileStream cseStream = new FileStream(outputFileName, FileMode.Open, FileAccess.ReadWrite))
+                {
+                    CriCseMasker.Mask(cseStream, cseStream.Length);
+                }
+            }
+
             if (MainForm.Settings.EnableCPKCreation == true)
             {
                 if (cpkArchive.Count > 0)

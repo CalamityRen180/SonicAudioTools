@@ -260,7 +260,7 @@ namespace CsbBuilder
             {
                 Title = "Import CSB file",
                 DefaultExt = "csb",
-                Filter = "CSB Files|*.csb",
+                Filter = "CSB, CSE Files|*.csb; *.cse|CSB Files|*.csb|CSE Files|*.cse",
             };
             {
                 if (openCsbFile.ShowDialog() == true)
@@ -952,7 +952,7 @@ namespace CsbBuilder
             {
                 Title = "Build current project as",
                 DefaultExt = "csb",
-                Filter = "CSB Files|*.csb",
+                Filter = "CSB Files|*.csb|CSE Files|*.cse",
                 FileName = project.Name,
             };
             {
@@ -1016,7 +1016,7 @@ namespace CsbBuilder
             {
                 Title = "Import and merge CSB file with",
                 DefaultExt = "csb",
-                Filter = "CSB Files|*.csb",
+                Filter = "CSB, CSE Files|*.csb; *.cse|CSB Files|*.csb|CSE Files|*.cse",
             };
             {
                 if (openCsbFile.ShowDialog() == true)
@@ -1478,7 +1478,7 @@ namespace CsbBuilder
                     Volume = volume,
                     Pitch = pitch,
                 };
-            } 
+            }
 
             else if (string.IsNullOrEmpty(soundElementNode.Intro) && !string.IsNullOrEmpty(soundElementNode.Loop))
             {
@@ -2414,7 +2414,7 @@ namespace CsbBuilder
                         MessageBox.Show("You can't select more than 2 ADX files.", "CSB Builder", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
-                    else if (openFileDialog.FileNames.Length == 2 && 
+                    else if (openFileDialog.FileNames.Length == 2 &&
                         !Path.GetExtension(openFileDialog.FileNames[0]).Equals(
                             Path.GetExtension(openFileDialog.FileNames[1]), StringComparison.OrdinalIgnoreCase))
                     {
@@ -2494,9 +2494,9 @@ namespace CsbBuilder
 
                                 using (reader)
                                 {
-                                    string outputFileName = 
+                                    string outputFileName =
                                         Path.Combine(
-                                            Path.GetDirectoryName(saveFileDialog.FileName), 
+                                            Path.GetDirectoryName(saveFileDialog.FileName),
                                             Path.GetFileNameWithoutExtension(fileName));
 
                                     WaveFileWriter introWriter;

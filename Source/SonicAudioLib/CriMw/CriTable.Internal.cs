@@ -32,7 +32,7 @@ namespace SonicAudioLib.CriMw
         Name = 16,
         DefaultValue = 32,
         RowStorage = 64,
-        
+
         Byte = 0,
         SByte = 1,
         UInt16 = 2,
@@ -59,6 +59,84 @@ namespace SonicAudioLib.CriMw
         public uint Length;
         public uint Offset;
         public object Value;
+    }
+
+    public static class CriCseMasker
+    {
+        public const int MaskLength = 64;
+
+        private static readonly byte[] Key =
+        {
+            0x63, 0x38, 0x34, 0x35, 0x4D, 0x42, 0x41, 0x61, 0x2A, 0x21, 0x32, 0x26, 0x29, 0xA3, 0x5F, 0x29,
+            0x28, 0x3E, 0x3C, 0x50, 0x66, 0x61, 0x70, 0x64, 0x2C, 0x68, 0x79, 0x61, 0x49, 0x48, 0x26, 0x25,
+            0x26, 0x31, 0x4C, 0x44, 0x39, 0x26, 0x2A, 0x2A, 0x55, 0x75, 0x6B, 0x7A, 0x6D, 0x5E, 0x21, 0x7B,
+            0x7D, 0x3A, 0x40, 0x26, 0x5E, 0x2A, 0x2B, 0x3F, 0x39, 0x36, 0x39, 0x64, 0x66, 0x60, 0x60, 0x40,
+        };
+
+        public static bool IsCseMasked(byte[] header)
+        {
+            if (header == null || header.Length < 4)
+            {
+                return false;
+            }
+
+            return (header[0] ^ Key[0]) == CriTableHeader.SignatureBytes[0]
+                && (header[1] ^ Key[1]) == CriTableHeader.SignatureBytes[1]
+                && (header[2] ^ Key[2]) == CriTableHeader.SignatureBytes[2]
+                && (header[3] ^ Key[3]) == CriTableHeader.SignatureBytes[3];
+        }
+
+        public static void Mask(Stream source, long length)
+        {
+            long currentPosition = source.Position;
+            long end = Math.Min(currentPosition + length, currentPosition + MaskLength);
+
+            int index = 0;
+            while (source.Position < end)
+            {
+                byte maskedByte = (byte)(source.ReadByte() ^ Key[index++]);
+                source.Position--;
+                source.WriteByte(maskedByte);
+            }
+        }
+
+        public static void Mask(byte[] data, int offset, int length)
+        {
+            int end = Math.Min(offset + length, offset + MaskLength);
+
+            int keyIndex = 0;
+            for (int i = offset; i < end && i < data.Length; i++)
+            {
+                data[i] ^= Key[keyIndex++];
+            }
+        }
+
+        public static Stream Unmask(Stream source)
+        {
+            if (source == null || !source.CanRead)
+            {
+                return source;
+            }
+
+            long startPosition = source.Position;
+
+            byte[] header = new byte[4];
+            int bytesRead = source.Read(header, 0, 4);
+            source.Position = startPosition;
+
+            if (bytesRead < 4 || !IsCseMasked(header))
+            {
+                return source;
+            }
+
+            int length = (int)(source.Length - startPosition);
+            byte[] data = new byte[length];
+            source.Read(data, 0, length);
+
+            Mask(data, 0, length);
+
+            return new MemoryStream(data);
+        }
     }
 
     static class CriTableMasker
