@@ -97,6 +97,18 @@ namespace CsbBuilder.Project
         [Description("Default project directory of imported CSB files.")]
         public ProjectDirectory ImportedCsbProjectDirectory { get; set; }
 
+        [DisplayName("Has ExtensionSize Field"), Category("CSB Field")]
+        [Description("Whether the Version Info Table includes the ExtSize field. The CSE files ususally don't have this field.")]
+        public bool HasExtensionSizeField { get; set; }
+
+        [DisplayName("Cue Has Flag"), Category("CSB Field")]
+        [Description("Whether the Cue Table includes the flags field. It's rare for a CSB to not have this field.")]
+        public bool CueHasFlag { get; set; }
+
+        [DisplayName("Has Sample Count Field"), Category("CSB Field")]
+        [Description("Whether the Sound Element Table includes the nsmpl field. It's rare for a CSB to not have this field.")]
+        public bool HasSampleCountField { get; set; }
+
         [DisplayName("Rename Sound node to referenced Sound Element node"), Category("Application")]
         public bool RenameToSoundElement { get; set; }
 
@@ -123,6 +135,14 @@ namespace CsbBuilder.Project
         [DisplayName("Fade Out Delay Time"), Category("Audio Converter")]
         [Description("How much time it takes before starting to fade out when converting to .wav.")]
         public double FadeDelay { get; set; }
+
+        [DisplayName("Data Format Version"), Category("Version Info Table")]
+        [Description("Data Format Version")]
+        public uint DataFormatVersion { get; set; }
+
+        [DisplayName("ExtSize"), Category("Version Info Table")]
+        [Description("ExtSize")]
+        public uint ExtensionSize { get; set; }
 
         public static Settings Load()
         {
@@ -180,6 +200,11 @@ namespace CsbBuilder.Project
             LoopCount = 2;
             FadeTime = 10;
             FadeDelay = 0;
+            DataFormatVersion = 0x940000;
+            ExtensionSize = 0;
+            HasExtensionSizeField = true;
+            CueHasFlag = true;
+            HasSampleCountField = true;
         }
     }
 }

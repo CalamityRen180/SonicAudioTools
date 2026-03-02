@@ -23,6 +23,15 @@ namespace SonicAudioLib.CriMw.Serialization
             }
         }
 
+        public static byte[] Serialize<T>(List<T> objects, CriTableWriterSettings settings, HashSet<string> skipFields)
+        {
+            using (MemoryStream destination = new MemoryStream())
+            {
+                Serialize(destination, typeof(T), objects, settings, skipFields);
+                return destination.ToArray();
+            }
+        }
+
         public static void Serialize<T>(string destinationFileName, List<T> objects, CriTableWriterSettings settings)
         {
             Serialize(destinationFileName, objects, settings, 4096);
@@ -42,6 +51,11 @@ namespace SonicAudioLib.CriMw.Serialization
         }
 
         public static void Serialize(Stream destination, Type type, ICollection objects, CriTableWriterSettings settings)
+        {
+            Serialize(destination, type, objects, settings, null);
+        }
+
+        public static void Serialize(Stream destination, Type type, ICollection objects, CriTableWriterSettings settings, HashSet<string> skipFields)
         {
             ArrayList arrayList = null;
 
@@ -75,7 +89,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 // Ignore the properties that are not supportable
                 if (propertyInfo.PropertyType != typeof(FileInfo) &&
                     propertyInfo.PropertyType != typeof(Stream) &&
-                    propertyInfo.PropertyType != typeof(bool) &&    
+                    propertyInfo.PropertyType != typeof(bool) &&
                     !propertyInfo.PropertyType.IsEnum &&
                     !CriField.FieldTypes.Contains(propertyInfo.PropertyType))
                 {
@@ -83,6 +97,15 @@ namespace SonicAudioLib.CriMw.Serialization
                 }
 
                 CriFieldAttribute fieldAttribute = propertyInfo.GetCustomAttribute<CriFieldAttribute>();
+
+                // Skip fields that the caller wants to exclude entirely.
+                if (skipFields != null && fieldAttribute != null && !string.IsNullOrEmpty(fieldAttribute.FieldName))
+                {
+                    if (skipFields.Contains(fieldAttribute.FieldName))
+                    {
+                        continue;
+                    }
+                }
 
                 int order = ushort.MaxValue;
                 if (fieldAttribute != null)
@@ -129,7 +152,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 string fieldName = propertyInfo.Name;
                 Type fieldType = propertyInfo.PropertyType;
                 object defaultValue = null;
-    
+
                 if (fieldType == typeof(FileInfo) || fieldType == typeof(Stream))
                 {
                     fieldType = typeof(byte[]);
@@ -149,7 +172,7 @@ namespace SonicAudioLib.CriMw.Serialization
                 {
                     if (!string.IsNullOrEmpty(fieldAttribute.FieldName))
                     {
-                        fieldName = fieldAttribute.FieldName;   
+                        fieldName = fieldAttribute.FieldName;
                     }
                 }
 
@@ -287,8 +310,9 @@ namespace SonicAudioLib.CriMw.Serialization
             }
 
             using (Stream source = new FileStream(sourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize))
+            using (Stream unmasked = CriCseMasker.Unmask(source))
             {
-                return Deserialize(CriCseMasker.Unmask(source), type);
+                return Deserialize(unmasked, type);
             }
         }
 

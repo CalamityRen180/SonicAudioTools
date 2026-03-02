@@ -11,6 +11,7 @@ using CsbBuilder.BuilderNodes;
 using CsbBuilder.Serialization;
 
 using SonicAudioLib.IO;
+using SonicAudioLib.CriMw;
 using SonicAudioLib.CriMw.Serialization;
 using SonicAudioLib.Archives;
 
@@ -58,6 +59,40 @@ namespace CsbBuilder.Importer
                 if (cueSheets.Exists(table => table.TableType == 6))
                 {
                     voiceLimitGroupTables = CriTableSerializer.Deserialize<SerializationVoiceLimitGroupTable>(cueSheets.FirstOrDefault(table => table.TableType == 6).TableData);
+                }
+
+                // Deserialize version info table
+                if (cueSheets.Exists(table => table.TableType == 7))
+                {
+                    List<SerializationVersionInfoTable> versionInfoTables = CriTableSerializer.Deserialize<SerializationVersionInfoTable>(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData);
+
+                    foreach (SerializationVersionInfoTable versionInfoTable in versionInfoTables)
+                    {
+                        project.DataFormatVersion = versionInfoTable.DataFormatVersion;
+                        project.ExtensionSize = versionInfoTable.ExtensionSize;
+                    }
+
+                    // Detect if ExtSize field is present in the table.
+                    using (CriTableReader infoReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData))
+                    {
+                        project.HasExtensionSizeField = infoReader.ContainsField("ExtSize");
+                    }
+                }
+                else
+                {
+                    project.HasExtensionSizeField = false;
+                }
+
+                // Detect if flags field is present in the CUE table.
+                using (CriTableReader cueReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 1).TableData))
+                {
+                    project.CueHasFlag = cueReader.ContainsField("flags");
+                }
+
+                // Detect if nsmpl field is present in the SOUND_ELEMENT table.
+                using (CriTableReader soundElementReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 4).TableData))
+                {
+                    project.HasSampleCountField = soundElementReader.ContainsField("nsmpl");
                 }
 
                 // Deserialize Sound Element tables
@@ -334,10 +369,7 @@ namespace CsbBuilder.Importer
                         for (int ac = 0; ac < aisacs.Count(); ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < name.Count(); nc++)
-                            {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 
@@ -379,6 +411,40 @@ namespace CsbBuilder.Importer
                 if (cueSheets.Exists(table => table.TableType == 6))
                 {
                     voiceLimitGroupTables = CriTableSerializer.Deserialize<SerializationVoiceLimitGroupTable>(cueSheets.FirstOrDefault(table => table.TableType == 6).TableData);
+                }
+
+                // Deserialize version info table
+                if (cueSheets.Exists(table => table.TableType == 7))
+                {
+                    List<SerializationVersionInfoTable> versionInfoTables = CriTableSerializer.Deserialize<SerializationVersionInfoTable>(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData);
+
+                    foreach (SerializationVersionInfoTable versionInfoTable in versionInfoTables)
+                    {
+                        project.DataFormatVersion = versionInfoTable.DataFormatVersion;
+                        project.ExtensionSize = versionInfoTable.ExtensionSize;
+                    }
+
+                    // Detect if ExtSize field is present in the table.
+                    using (CriTableReader infoReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData))
+                    {
+                        project.HasExtensionSizeField = infoReader.ContainsField("ExtSize");
+                    }
+                }
+                else
+                {
+                    project.HasExtensionSizeField = false;
+                }
+
+                // Detect if flags field is present in the CUE table.
+                using (CriTableReader cueReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 1).TableData))
+                {
+                    project.CueHasFlag = cueReader.ContainsField("flags");
+                }
+
+                // Detect if nsmpl field is present in the SOUND_ELEMENT table.
+                using (CriTableReader soundElementReader = CriTableReader.Create(cueSheets.FirstOrDefault(table => table.TableType == 4).TableData))
+                {
+                    project.HasSampleCountField = soundElementReader.ContainsField("nsmpl");
                 }
 
                 // Deserialize Sound Element tables
@@ -627,10 +693,7 @@ namespace CsbBuilder.Importer
                         for (int ac = 0; ac < aisacs.Count(); ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < aisacs.Count(); nc++)
-                            {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 

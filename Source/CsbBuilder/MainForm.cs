@@ -35,6 +35,7 @@ namespace CsbBuilder
     public partial class MainForm : Form
     {
         public static Settings Settings;
+        public static System.Windows.Forms.TreeView AisacTreeView;
 
         private bool enabled = false;
         private bool saved = true;
@@ -74,6 +75,7 @@ namespace CsbBuilder
             imageList.Images.Add("Sound", Resources.Sound);
 
             Settings = Settings.Load();
+            AisacTreeView = aisacTree;
         }
 
         public void ClearTreeViews()
@@ -342,7 +344,7 @@ namespace CsbBuilder
             {
                 project.AisacNodes.Remove(aisacNode);
 
-                project.SynthNodes.Where(synth => synth.AisacReference == aisacNode.Name).ToList().ForEach(synth => synth.AisacReference = string.Empty);
+                project.SynthNodes.ForEach(synth => synth.AisacReferences.Remove(aisacNode.Name));
             }
 
             else if (node is BuilderVoiceLimitGroupNode voiceLimitGroupNode)
@@ -763,7 +765,11 @@ namespace CsbBuilder
 
                         else if (baseNode is BuilderAisacNode)
                         {
-                            project.SynthNodes.Where(synth => synth.AisacReference == previousName).ToList().ForEach(synth => synth.AisacReference = fullPath);
+                            project.SynthNodes.ForEach(synth =>
+                            {
+                                int idx = synth.AisacReferences.IndexOf(previousName);
+                                if (idx >= 0) synth.AisacReferences[idx] = fullPath;
+                            });
                         }
 
                         else if (baseNode is BuilderVoiceLimitGroupNode)
@@ -830,7 +836,11 @@ namespace CsbBuilder
 
             else if (node.Tag is BuilderAisacNode)
             {
-                project.SynthNodes.Where(synth => synth.AisacReference == previousName).ToList().ForEach(synth => synth.AisacReference = fullPath);
+                project.SynthNodes.ForEach(synth =>
+                {
+                    int idx = synth.AisacReferences.IndexOf(previousName);
+                    if (idx >= 0) synth.AisacReferences[idx] = fullPath;
+                });
             }
 
             else if (node.Tag is BuilderVoiceLimitGroupNode)
@@ -980,7 +990,21 @@ namespace CsbBuilder
             {
                 if (openProject.ShowDialog() == true)
                 {
+                    // Save current project's settings before load overwrites them.
+                    uint savedDataFormatVersion = Settings.DataFormatVersion;
+                    uint savedExtensionSize = Settings.ExtensionSize;
+                    bool savedHasExtensionSizeField = Settings.HasExtensionSizeField;
+                    bool savedCueHasFlag = Settings.CueHasFlag;
+                    bool savedHasSampleCountField = Settings.HasSampleCountField;
+
                     CsbProject csbProject = CsbProject.Load(openProject.FileName);
+
+                    // Restore current project's settings.
+                    Settings.DataFormatVersion = savedDataFormatVersion;
+                    Settings.ExtensionSize = savedExtensionSize;
+                    Settings.HasExtensionSizeField = savedHasExtensionSizeField;
+                    Settings.CueHasFlag = savedCueHasFlag;
+                    Settings.HasSampleCountField = savedHasSampleCountField;
 
                     if (!csbProject.AudioDirectory.Exists)
                     {
@@ -1021,9 +1045,23 @@ namespace CsbBuilder
             {
                 if (openCsbFile.ShowDialog() == true)
                 {
+                    // Save current project's settings before import overwrites them.
+                    uint savedDataFormatVersion = Settings.DataFormatVersion;
+                    uint savedExtensionSize = Settings.ExtensionSize;
+                    bool savedHasExtensionSizeField = Settings.HasExtensionSizeField;
+                    bool savedCueHasFlag = Settings.CueHasFlag;
+                    bool savedHasSampleCountField = Settings.HasSampleCountField;
+
                     CsbProject csbProject = new CsbProject();
                     csbProject.Directory = project.Directory;
                     CsbImporter.Import(openCsbFile.FileName, csbProject);
+
+                    // Restore current project's settings.
+                    Settings.DataFormatVersion = savedDataFormatVersion;
+                    Settings.ExtensionSize = savedExtensionSize;
+                    Settings.HasExtensionSizeField = savedHasExtensionSizeField;
+                    Settings.CueHasFlag = savedCueHasFlag;
+                    Settings.HasSampleCountField = savedHasSampleCountField;
 
                     project.CueNodes.AddRange(csbProject.CueNodes);
                     project.SynthNodes.AddRange(csbProject.SynthNodes);
@@ -1114,31 +1152,22 @@ namespace CsbBuilder
                 return;
             }
 
-            using (SetReferenceForm setReferenceForm = new SetReferenceForm(aisacTree))
+            ContextMenuStrip menuStrip = (ContextMenuStrip)((ToolStripItem)sender).Owner;
+
+            if (menuStrip.SourceControl is TreeView selectedTree)
             {
-                if (setReferenceForm.ShowDialog(this) == DialogResult.OK)
+                TreeNode selectedNode = selectedTree.SelectedNode;
+
+                if (selectedNode.Tag is BuilderSynthNode synthNode)
                 {
-                    ContextMenuStrip menuStrip = (ContextMenuStrip)((ToolStripItem)sender).Owner;
-
-                    if (menuStrip.SourceControl is TreeView selectedTree)
+                    using (AisacCollectionEditorForm editorForm = new AisacCollectionEditorForm(synthNode.AisacReferences, aisacTree))
                     {
-                        TreeNode selectedNode = selectedTree.SelectedNode;
-
-                        if (selectedNode.Tag is BuilderSynthNode synthNode)
+                        if (editorForm.ShowDialog(this) == DialogResult.OK)
                         {
-                            if (setReferenceForm.SelectedNode == null)
-                            {
-                                synthNode.AisacReference = string.Empty;
-                            }
-
-                            else
-                            {
-                                synthNode.AisacReference = setReferenceForm.SelectedNode.FullPath;
-                            }
+                            synthNode.AisacReferences = editorForm.References;
+                            saved = false;
+                            propertyGrid.Refresh();
                         }
-
-                        saved = false;
-                        propertyGrid.Refresh();
                     }
                 }
             }
@@ -1254,9 +1283,9 @@ namespace CsbBuilder
 
                 if (selectedNode.Tag is BuilderSynthNode synthNode)
                 {
-                    if (!string.IsNullOrEmpty(synthNode.AisacReference))
+                    if (synthNode.AisacReferences.Count > 0)
                     {
-                        TreeNode treeNode = aisacTree.FindNodeByFullPath(synthNode.AisacReference);
+                        TreeNode treeNode = aisacTree.FindNodeByFullPath(synthNode.AisacReferences[0]);
 
                         tabControl1.SelectTab(tabPage1);
                         aisacTree.SelectedNode = treeNode;
@@ -1797,10 +1826,7 @@ namespace CsbBuilder
                     synthNode.SoundElementReference = string.Empty;
                 }
 
-                if (!string.IsNullOrEmpty(synthNode.AisacReference) && aisacTree.FindNodeByFullPath(synthNode.AisacReference) == null)
-                {
-                    synthNode.AisacReference = string.Empty;
-                }
+                synthNode.AisacReferences.RemoveAll(aisacRef => aisacTree.FindNodeByFullPath(aisacRef) == null);
 
                 if (!string.IsNullOrEmpty(synthNode.VoiceLimitGroupReference) && !voiceLimitGroupTree.Nodes.ContainsKey(synthNode.VoiceLimitGroupReference))
                 {

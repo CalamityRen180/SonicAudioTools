@@ -37,6 +37,45 @@ namespace CsbBuilder.Project
             }
         }
 
+        public bool HasExtensionSizeField
+        {
+            get
+            {
+                return MainForm.Settings.HasExtensionSizeField;
+            }
+
+            set
+            {
+                MainForm.Settings.HasExtensionSizeField = value;
+            }
+        }
+
+        public bool CueHasFlag
+        {
+            get
+            {
+                return MainForm.Settings.CueHasFlag;
+            }
+
+            set
+            {
+                MainForm.Settings.CueHasFlag = value;
+            }
+        }
+
+        public bool HasSampleCountField
+        {
+            get
+            {
+                return MainForm.Settings.HasSampleCountField;
+            }
+
+            set
+            {
+                MainForm.Settings.HasSampleCountField = value;
+            }
+        }
+
         [XmlIgnore]
         public DirectoryInfo Directory
         {
@@ -75,6 +114,56 @@ namespace CsbBuilder.Project
             get
             {
                 return new FileInfo(Path.Combine(directory.FullName, $"{name}.csbproject"));
+            }
+        }
+
+        [XmlElement("VersionInfoTable")]
+        public VersionInfoTable VersionInfo
+        {
+            get
+            {
+                return new VersionInfoTable
+                {
+                    DataFormatVersion = MainForm.Settings.DataFormatVersion,
+                    ExtensionSize = MainForm.Settings.ExtensionSize
+                };
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    MainForm.Settings.DataFormatVersion = value.DataFormatVersion;
+                    MainForm.Settings.ExtensionSize = value.ExtensionSize;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public uint DataFormatVersion
+        {
+            get
+            {
+                return MainForm.Settings.DataFormatVersion;
+            }
+
+            set
+            {
+                MainForm.Settings.DataFormatVersion = value;
+            }
+        }
+
+        [XmlIgnore]
+        public uint ExtensionSize
+        {
+            get
+            {
+                return MainForm.Settings.ExtensionSize;
+            }
+
+            set
+            {
+                MainForm.Settings.ExtensionSize = value;
             }
         }
 
@@ -259,5 +348,11 @@ namespace CsbBuilder.Project
             name = MainForm.Settings.ProjectsName;
             directory = new DirectoryInfo(Path.Combine(MainForm.Settings.ProjectsDirectory, name));
         }
+    }
+
+    public class VersionInfoTable
+    {
+        public uint DataFormatVersion { get; set; }
+        public uint ExtensionSize { get; set; }
     }
 }
