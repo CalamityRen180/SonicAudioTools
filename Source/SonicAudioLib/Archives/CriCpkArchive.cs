@@ -66,10 +66,6 @@ namespace SonicAudioLib.Archives
 
             set
             {
-                if (align != 1)
-                {
-                    throw new NotImplementedException("Alignment is currently not implemented.");
-                }
 
                 align = value;
             }
@@ -390,7 +386,7 @@ namespace SonicAudioLib.Archives
                                 entry.Name,
                                 (uint)entry.Length,
                                 (uint)entry.Length,
-                                (ulong)(vldPool.Length - 2048),
+                                (ulong)(Helpers.Align(vldPool.Length, align) - 2048),
                                 entry.Id,
                                 entry.Comment);
 

@@ -20,12 +20,19 @@ namespace CsbBuilder.Builder
         {
                 CriCpkArchive cpkArchive = new CriCpkArchive();
 
-                DirectoryInfo outputDirectory = new DirectoryInfo(Path.GetDirectoryName(outputFileName));
+            cpkArchive.Align = MainForm.Settings.CpkAlign;
+
+            DirectoryInfo outputDirectory = new DirectoryInfo(Path.GetDirectoryName(outputFileName));
 
                 List<SerializationCueSheetTable> cueSheetTables = new List<SerializationCueSheetTable>();
 
-                SerializationVersionInfoTable versionInfoTable = new SerializationVersionInfoTable();
-                cueSheetTables.Add(new SerializationCueSheetTable
+            SerializationVersionInfoTable versionInfoTable = new SerializationVersionInfoTable
+            {
+                DataFormatVersion = project.DataFormatVersion,
+                ExtensionSize = project.ExtensionSize,
+            };
+
+            cueSheetTables.Add(new SerializationCueSheetTable
                 {
                     TableData = CriTableSerializer.Serialize(new List<SerializationVersionInfoTable>() { versionInfoTable }, CriTableWriterSettings.AdxSettings),
                     Name = "INFO",
@@ -161,11 +168,14 @@ namespace CsbBuilder.Builder
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(synthNode.AisacReference))
+                if (synthNode.AisacReferences.Count > 0)
+                {
+                    foreach (string aisacRef in synthNode.AisacReferences)
                     {
-                        BuilderAisacNode aisacNode = project.AisacNodes.First(aisac => aisac.Name == synthNode.AisacReference);
-                        synthTable.AisacSetName = aisacNode.AisacName + "::" + aisacNode.Name + (char)0x0A;
-                    }
+                        BuilderAisacNode aisacNode = project.AisacNodes.First(aisac => aisac.Name == aisacRef);
+                        synthTable.AisacSetName += aisacNode.AisacName + "::" + aisacNode.Name + (char)0x0A;
+                    }                        
+                }
 
                     synthTables.Add(synthTable);
                 }

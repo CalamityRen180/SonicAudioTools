@@ -78,6 +78,56 @@ namespace CsbBuilder.Project
             }
         }
 
+        [XmlElement("VersionInfoTable")]
+        public VersionInfoTable VersionInfo
+        {
+            get
+            {
+                return new VersionInfoTable
+                {
+                    DataFormatVersion = MainForm.Settings.DataFormatVersion,
+                    ExtensionSize = MainForm.Settings.ExtensionSize
+                };
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    MainForm.Settings.DataFormatVersion = value.DataFormatVersion;
+                    MainForm.Settings.ExtensionSize = value.ExtensionSize;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public uint DataFormatVersion
+        {
+            get
+            {
+                return MainForm.Settings.DataFormatVersion;
+            }
+
+            set
+            {
+                MainForm.Settings.DataFormatVersion = value;
+            }
+        }
+
+        [XmlIgnore]
+        public uint ExtensionSize
+        {
+            get
+            {
+                return MainForm.Settings.ExtensionSize;
+            }
+
+            set
+            {
+                MainForm.Settings.ExtensionSize = value;
+            }
+        }
+
         [XmlArray("CueNodes"), XmlArrayItem(typeof(BuilderCueNode))]
         public List<BuilderCueNode> CueNodes
         {
@@ -263,5 +313,10 @@ namespace CsbBuilder.Project
             name = MainForm.Settings.ProjectsName;
             directory = new DirectoryInfo(Path.Combine(MainForm.Settings.ProjectsDirectory, name));
         }
+    }
+    public class VersionInfoTable
+    {
+        public uint DataFormatVersion { get; set; }
+        public uint ExtensionSize { get; set; }
     }
 }

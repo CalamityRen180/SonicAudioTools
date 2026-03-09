@@ -266,7 +266,7 @@ namespace SonicAudioLib.CriMw.Serialization
 
             using (Stream source = new FileStream(sourceFileName, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize))
             {
-                return Deserialize(source, type);
+                return Deserialize(CriCseMasker.Unmask(source), type);
             }
         }
 

@@ -69,10 +69,10 @@ namespace CsbBuilder.BuilderNodes
         [Browsable(false)]
         public List<string> Children { get; set; }
 
-        [ReadOnly(true)]
-        [Category("General"), DisplayName("Aisac Reference Path")]
-        [Description("Full reference path of aisac node.")]
-        public string AisacReference { get; set; }
+        [Category("General"), DisplayName("Aisac Reference Paths")]
+        [Description("Full reference paths of aisac nodes.")]
+        [Editor(typeof(CsbBuilder.AisacReferencesEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public List<string> AisacReferences { get; set; }
 
         [Category("General")]
         [Description("Volume of this synth. 1000 equals to 100%.")]
@@ -395,6 +395,7 @@ namespace CsbBuilder.BuilderNodes
         public BuilderSynthNode()
         {
             Children = new List<string>();
+            AisacReferences = new List<string>();
 
             Volume = 1000;
 

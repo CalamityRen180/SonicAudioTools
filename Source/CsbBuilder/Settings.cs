@@ -13,6 +13,46 @@ namespace CsbBuilder.Project
 {
     public class Settings : ICloneable
     {
+        public class CpkAlignConverter : TypeConverter
+        {
+            private static readonly ushort[] values =
+                { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
+                return true;
+            }
+
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+            {
+                return true;
+            }
+
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
+                return new StandardValuesCollection(values);
+            }
+
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType == typeof(string))
+                {
+                    return true;
+                }
+
+                return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                if (value is string text && ushort.TryParse(text, out ushort result))
+                {
+                    return result;
+                }
+
+                return base.ConvertFrom(context, culture, value);
+            }
+        }
         public enum ProjectDirectory
         {
             DirectoryOfProjects,
@@ -30,6 +70,11 @@ namespace CsbBuilder.Project
         [DisplayName("Name node after its parent"), Category("General")]
         [Description("Determines whether a node is going to be named after its parent when created.")]
         public bool NameNodeAfterParent { get; set; }
+
+        [DisplayName("CpkAlign"), Category("Stream")]
+        [Description("What Data Alignment the streamed audio will have on a CPK file.")]
+        [TypeConverter(typeof(CpkAlignConverter))]
+        public ushort CpkAlign { get; set; }
 
         [DisplayName("EnableCPKCreation"), Category("Stream")]
         [Description("Wheater we either create CPK files with the streamed audio files OR we write the streamed audio files externally.")]
@@ -77,6 +122,14 @@ namespace CsbBuilder.Project
         [DisplayName("Fade Out Delay Time"), Category("Audio Converter")]
         [Description("How much time it takes before starting to fade out when converting to .wav.")]
         public double FadeDelay { get; set; }
+
+        [DisplayName("Data Format Version"), Category("Version Info Table")]
+        [Description("Data Format Version")]
+        public uint DataFormatVersion { get; set; }
+
+        [DisplayName("ExtSize"), Category("Version Info Table")]
+        [Description("ExtSize")]
+        public uint ExtensionSize { get; set; }
 
         public static Settings Load()
         {
@@ -128,11 +181,14 @@ namespace CsbBuilder.Project
             ImportedCsbProjectDirectory = ProjectDirectory.DirectoryOfCsb;
             RenameToSoundElement = true;
             EnableThreading = true;
+            CpkAlign = 1;
             EnableCPKCreation = true;
             MaxThreads = 4;
             LoopCount = 2;
             FadeTime = 10;
             FadeDelay = 0;
+            DataFormatVersion = 0x940000;
+            ExtensionSize = 0;
         }
     }
 }

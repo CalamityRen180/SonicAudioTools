@@ -60,6 +60,18 @@ namespace CsbBuilder.Importer
                     voiceLimitGroupTables = CriTableSerializer.Deserialize<SerializationVoiceLimitGroupTable>(cueSheets.FirstOrDefault(table => table.TableType == 6).TableData);
                 }
 
+                // Deserialize version info table
+                if (cueSheets.Exists(table => table.TableType == 7))
+                {
+                    List<SerializationVersionInfoTable> versionInfoTables = CriTableSerializer.Deserialize<SerializationVersionInfoTable>(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData);
+
+                    foreach (SerializationVersionInfoTable versionInfoTable in versionInfoTables)
+                    {
+                        project.DataFormatVersion = versionInfoTable.DataFormatVersion;
+                        project.ExtensionSize = versionInfoTable.ExtensionSize;
+                    }
+                }
+
                 // Deserialize Sound Element tables
 
                 foreach (SerializationSoundElementTable soundElementTable in soundElementTables)
@@ -341,7 +353,7 @@ namespace CsbBuilder.Importer
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
                             for (int nc = 0; nc < name.Count(); nc++)
                             {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                                synthNode.AisacReferences.Add(name[1]);
                             }
                         }
                     }
@@ -386,10 +398,22 @@ namespace CsbBuilder.Importer
                     voiceLimitGroupTables = CriTableSerializer.Deserialize<SerializationVoiceLimitGroupTable>(cueSheets.FirstOrDefault(table => table.TableType == 6).TableData);
                 }
 
-                // Deserialize Sound Element tables
+                // Deserialize version info table
+                if (cueSheets.Exists(table => table.TableType == 7))
+                {
+                    List<SerializationVersionInfoTable> versionInfoTables = CriTableSerializer.Deserialize<SerializationVersionInfoTable>(cueSheets.FirstOrDefault(table => table.TableType == 7).TableData);
 
-                // BUT BEFORE THAT, see if there's any sound element with Streamed on
-                if (soundElementTables.Exists(soundElementTable => soundElementTable.Streaming))
+                    foreach (SerializationVersionInfoTable versionInfoTable in versionInfoTables)
+                    {
+                        project.DataFormatVersion = versionInfoTable.DataFormatVersion;
+                        project.ExtensionSize = versionInfoTable.ExtensionSize;
+                    }
+                }
+
+                    // Deserialize Sound Element tables
+
+                    // BUT BEFORE THAT, see if there's any sound element with Streamed on
+                    if (soundElementTables.Exists(soundElementTable => soundElementTable.Streaming))
                 {
                     if (!cpkexists)
                     {
@@ -639,7 +663,7 @@ namespace CsbBuilder.Importer
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
                             for (int nc = 0; nc < aisacs.Count(); nc++)
                             {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
+                                synthNode.AisacReferences.Add(name[1]);
                             }
                         }
                     }
