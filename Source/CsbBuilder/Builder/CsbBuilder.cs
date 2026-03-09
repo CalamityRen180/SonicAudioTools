@@ -120,10 +120,13 @@ namespace CsbBuilder.Builder
                     }
                 }
 
-                if (!string.IsNullOrEmpty(synthNode.AisacReference))
+                if (synthNode.AisacReferences.Count > 0)
                 {
-                    BuilderAisacNode aisacNode = project.AisacNodes.First(aisac => aisac.Name == synthNode.AisacReference);
-                    synthTable.AisacSetName = aisacNode.AisacName + "::" + aisacNode.Name + (char)0x0A;
+                    foreach (string aisacRef in synthNode.AisacReferences)
+                    {
+                        BuilderAisacNode aisacNode = project.AisacNodes.First(aisac => aisac.Name == aisacRef);
+                        synthTable.AisacSetName += aisacNode.AisacName + "::" + aisacNode.Name + (char)0x0A;
+                    }
                 }
 
                 synthTables.Add(synthTable);

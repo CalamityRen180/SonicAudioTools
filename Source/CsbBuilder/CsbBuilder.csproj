@@ -89,6 +89,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AisacCollectionEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AisacCollectionEditorForm.Designer.cs" />
+    <Compile Include="AisacReferencesEditor.cs" />
     <Compile Include="Audio\ExtendedWaveStream.cs" />
     <Compile Include="Audio\PostSampleEditor.cs" />
     <Compile Include="Audio\VGMStreamNative.cs" />

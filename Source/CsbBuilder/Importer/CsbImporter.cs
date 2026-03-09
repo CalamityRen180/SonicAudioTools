@@ -299,10 +299,7 @@ namespace CsbBuilder.Importer
                         for (int ac = 0; ac < aisacs.Count(); ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < name.Count(); nc++)
-                            {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 
@@ -557,10 +554,7 @@ namespace CsbBuilder.Importer
                         for (int ac = 0; ac < aisacs.Count(); ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < aisacs.Count(); nc++)
-                            {
-                                synthNode.AisacReference = name[nc]; // will add support for multiple aisacs (I'm actually not even sure if csbs support multiple aisacs...)
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 
