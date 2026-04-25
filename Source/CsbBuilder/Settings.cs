@@ -80,6 +80,21 @@ namespace CsbBuilder.Project
         [Description("Wheater we either create CPK files with the streamed audio files OR we write the streamed audio files externally.")]
         public bool EnableCPKCreation { get; set; }
 
+        [DisplayName("CpkVersion"), Category("Stream")]
+        [Description("The CPK Version.")]
+        [TypeConverter(typeof(CpkAlignConverter))]
+        public ushort CpkVersion { get; set; }        
+
+        [DisplayName("CpkRevision"), Category("Stream")]
+        [Description("The CPK Revision.")]
+        [TypeConverter(typeof(CpkAlignConverter))]
+        public ushort CpkRevision { get; set; }
+
+        [DisplayName("CpkToolVersion"), Category("Stream")]
+        [Description("The CPK Tool Version. (DLL Name, DLL Version)")]
+        [TypeConverter(typeof(CpkAlignConverter))]
+        public string CpkTvers { get; set; }
+
         [DisplayName("Buffer size"), Category("Stream")]
         [Description("Buffer size to use for I/O operations.")]
         public int BufferSize { get; set; }
@@ -181,6 +196,9 @@ namespace CsbBuilder.Project
             ImportedCsbProjectDirectory = ProjectDirectory.DirectoryOfCsb;
             RenameToSoundElement = true;
             EnableThreading = true;
+            CpkVersion = 7;
+            CpkRevision = 2;
+            CpkTvers = "";
             CpkAlign = 1;
             EnableCPKCreation = true;
             MaxThreads = 4;

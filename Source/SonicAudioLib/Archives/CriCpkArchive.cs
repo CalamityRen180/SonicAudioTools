@@ -54,8 +54,41 @@ namespace SonicAudioLib.Archives
     public class CriCpkArchive : ArchiveBase<CriCpkEntry>
     {
         private ushort align = 1;
+        private ushort version = 7;
+        private ushort revision = 2;
+
+        private string tvers = $"{Assembly.GetEntryAssembly().GetName().Name}, {Assembly.GetEntryAssembly().GetName().Version}";
+
         private CriCpkMode mode = CriCpkMode.FileName;
         private bool enableMask = false;
+
+        public ushort Version
+        {
+            get
+            {
+                return version;
+            }
+
+            set
+            {
+
+                version = value;
+            }
+        }
+
+        public ushort Revision
+        {
+            get
+            {
+                return revision;
+            }
+
+            set
+            {
+
+                revision = value;
+            }
+        }        
 
         public ushort Align
         {
@@ -68,6 +101,20 @@ namespace SonicAudioLib.Archives
             {
 
                 align = value;
+            }
+        }
+
+        public string Tvers
+        {
+            get
+            {
+                return tvers;
+            }
+
+            set
+            {
+
+                tvers = value;
             }
         }
 
@@ -268,6 +315,18 @@ namespace SonicAudioLib.Archives
                 return $"{assemblyName.Name}, {assemblyName.Version.ToString()}";
             }
 
+            string GetEntryVirtualPath(CriCpkEntry entry)
+            {
+                string dir = (entry.DirectoryName ?? "").Replace('\\', '/');
+
+                if (!string.IsNullOrEmpty(dir))
+                {
+                    return dir + "/" + entry.Name;
+                }
+
+                return entry.Name;
+            }
+
             DataPool vldPool = new DataPool(Align, 2048);
             vldPool.ProgressChanged += OnProgressChanged;
 
@@ -322,8 +381,8 @@ namespace SonicAudioLib.Archives
 
                 cpkSection.Writer.WriteField("Tocs", typeof(uint), null);
                 cpkSection.Writer.WriteField("Files", typeof(uint));
-                cpkSection.Writer.WriteField("Groups", typeof(uint));
-                cpkSection.Writer.WriteField("Attrs", typeof(uint));
+                cpkSection.Writer.WriteField("Groups", typeof(uint), null);
+                cpkSection.Writer.WriteField("Attrs", typeof(uint), null);
                 cpkSection.Writer.WriteField("TotalFiles", typeof(uint), null);
                 cpkSection.Writer.WriteField("Directories", typeof(uint), null);
                 cpkSection.Writer.WriteField("Updates", typeof(uint), null);
@@ -359,8 +418,11 @@ namespace SonicAudioLib.Archives
                     tocMemoryStream = new MemoryStream();
                     etocMemoryStream = new MemoryStream();
 
-                    var orderedEntries = entries.OrderBy(entry => entry.Name).ToList();
+                    var orderedEntries = entries
+                        .OrderBy(entry => GetEntryVirtualPath(entry), StringComparer.OrdinalIgnoreCase)
+                        .ToList();
 
+                    bool isSorted = orderedEntries.Count > 0;
                     using (CriCpkSection tocSection = new CriCpkSection(tocMemoryStream, "TOC ", enableMask))
                     using (CriCpkSection etocSection = new CriCpkSection(etocMemoryStream, "ETOC", enableMask))
                     {
@@ -371,7 +433,15 @@ namespace SonicAudioLib.Archives
                         tocSection.Writer.WriteField("FileSize", typeof(uint));
                         tocSection.Writer.WriteField("ExtractSize", typeof(uint));
                         tocSection.Writer.WriteField("FileOffset", typeof(ulong));
-                        tocSection.Writer.WriteField("ID", typeof(uint));
+
+                        if (Version == 2)
+                        {
+                            tocSection.Writer.WriteField("Info", typeof(uint));
+                        }
+                        else
+                        {
+                            tocSection.Writer.WriteField("ID", typeof(uint));
+                        }
                         tocSection.Writer.WriteField("UserString", typeof(string));
 
                         etocSection.Writer.WriteStartTable("CpkEtocInfo");
@@ -381,12 +451,20 @@ namespace SonicAudioLib.Archives
 
                         foreach (CriCpkEntry entry in orderedEntries)
                         {
+                            long alignedPosition = Helpers.Align(vldPool.Length, Align);
+                            ulong fileOffset = (ulong)(alignedPosition - 2048);
+
+                            uint fileSize = (uint)entry.Length;
+                            uint extractSize = entry.IsCompressed
+                                ? (uint)entry.UncompressedLength
+                                : fileSize;
+
                             tocSection.Writer.WriteRow(true,
                                 (entry.DirectoryName).Replace('\\', '/'),
                                 entry.Name,
-                                (uint)entry.Length,
-                                (uint)entry.Length,
-                                (ulong)(Helpers.Align(vldPool.Length, align) - 2048),
+                                fileSize,
+                                extractSize,
+                                fileOffset,
                                 entry.Id,
                                 entry.Comment);
 
@@ -438,7 +516,7 @@ namespace SonicAudioLib.Archives
                         itocSection.Writer.WriteField("DataH", typeof(byte[]));
 
                         List<CriCpkEntry> filesL = entries.Where(entry => entry.Length < ushort.MaxValue).ToList();
-                        List<CriCpkEntry> filesH = entries.Where(entry => entry.Length > ushort.MaxValue).ToList();
+                        List<CriCpkEntry> filesH = entries.Where(entry => entry.Length >= ushort.MaxValue).ToList();
 
                         itocSection.Writer.WriteStartRow();
 
@@ -453,10 +531,14 @@ namespace SonicAudioLib.Archives
 
                             foreach (CriCpkEntry entry in filesL)
                             {
+                                ushort extractSize = entry.IsCompressed
+                                    ? (ushort)entry.UncompressedLength
+                                    : (ushort)entry.Length;
+
                                 dataWriter.WriteRow(true,
                                     (ushort)entry.Id,
                                     (ushort)entry.Length,
-                                    (ushort)entry.Length);
+                                    extractSize);
                             }
 
                             dataWriter.WriteEndTable();
@@ -503,11 +585,22 @@ namespace SonicAudioLib.Archives
                     throw new NotImplementedException($"Unimplemented CPK mode ({mode})");
                 }
 
+                long contentDataSize = vldPool.Length - 2048;
+
+                long enabledPackedSize = 0;
+                long enabledDataSize = 0;
+
+                foreach (CriCpkEntry entry in entries)
+                {
+                    enabledPackedSize += entry.Length;
+                    enabledDataSize += entry.IsCompressed ? entry.UncompressedLength : entry.Length;
+                }
+
                 cpkSection.Writer.WriteStartRow();
                 cpkSection.Writer.WriteValue("UpdateDateTime", CpkDateTimeFromDateTime(DateTime.Now));
 
                 cpkSection.Writer.WriteValue("ContentOffset", (ulong)2048);
-                cpkSection.Writer.WriteValue("ContentSize", (ulong)(vldPool.Length - 2048));
+                cpkSection.Writer.WriteValue("ContentSize", (ulong)contentDataSize);
 
                 if (tocMemoryStream != null)
                 {
@@ -538,13 +631,22 @@ namespace SonicAudioLib.Archives
 
                 cpkSection.Writer.WriteValue("Files", (uint)entries.Count);
 
-                cpkSection.Writer.WriteValue("Version", (ushort)7);
-                cpkSection.Writer.WriteValue("Revision", (ushort)2);
+                cpkSection.Writer.WriteValue("Version", Version);
+                cpkSection.Writer.WriteValue("Revision",Revision);
                 cpkSection.Writer.WriteValue("Align", Align);
                 cpkSection.Writer.WriteValue("Sorted", (ushort)1);
 
                 cpkSection.Writer.WriteValue("CpkMode", (uint)mode);
-                cpkSection.Writer.WriteValue("Tvers", GetToolVersion());
+
+                if (!string.IsNullOrEmpty(Tvers))
+                {
+                    cpkSection.Writer.WriteValue("Tvers", Tvers);
+                }
+                else
+                {
+                    cpkSection.Writer.WriteValue("Tvers", GetToolVersion());
+                }
+                
                 cpkSection.Writer.WriteValue("Comment", Comment);
 
                 cpkSection.Writer.WriteValue("FileSize", (ulong)vldPool.Length);

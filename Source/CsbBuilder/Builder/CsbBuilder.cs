@@ -20,7 +20,13 @@ namespace CsbBuilder.Builder
         {
                 CriCpkArchive cpkArchive = new CriCpkArchive();
 
+            cpkArchive.Version = MainForm.Settings.CpkVersion;
+
+            cpkArchive.Revision = MainForm.Settings.CpkRevision;
+
             cpkArchive.Align = MainForm.Settings.CpkAlign;
+
+            cpkArchive.Tvers = MainForm.Settings.CpkTvers;            
 
             DirectoryInfo outputDirectory = new DirectoryInfo(Path.GetDirectoryName(outputFileName));
 
