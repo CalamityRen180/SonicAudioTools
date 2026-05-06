@@ -348,13 +348,10 @@ namespace CsbBuilder.Importer
                     if (!string.IsNullOrEmpty(synthTable.AisacSetName))
                     {
                         string[] aisacs = synthTable.AisacSetName.Split(new char[] { (char)0x0A }, StringSplitOptions.RemoveEmptyEntries);
-                        for (int ac = 0; ac < aisacs.Count(); ac++)
+                        for (int ac = 0; ac < aisacs.Length; ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < name.Count(); nc++)
-                            {
-                                synthNode.AisacReferences.Add(name[1]);
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 
@@ -658,13 +655,10 @@ namespace CsbBuilder.Importer
                     if (!string.IsNullOrEmpty(synthTable.AisacSetName))
                     {
                         string[] aisacs = synthTable.AisacSetName.Split(new char[] { (char)0x0A }, StringSplitOptions.RemoveEmptyEntries);
-                        for (int ac = 0; ac < aisacs.Count(); ac++)
+                        for (int ac = 0; ac < aisacs.Length; ac++)
                         {
                             string[] name = aisacs[ac].Split(new string[] { "::" }, StringSplitOptions.None);
-                            for (int nc = 0; nc < aisacs.Count(); nc++)
-                            {
-                                synthNode.AisacReferences.Add(name[1]);
-                            }
+                            synthNode.AisacReferences.Add(name[1]);
                         }
                     }
 
